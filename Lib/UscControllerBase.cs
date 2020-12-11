@@ -8,51 +8,114 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPNETCore5Demo
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public abstract class UscControllerBase<TDbContext, TEntity> : ControllerBase where TDbContext : DbContext where TEntity : UscEntityModelBase
     {
         protected TDbContext Db { get; }
         protected DbSet<TEntity> DbSet { get; }
 
-        protected UscControllerBase(TDbContext Db, DbSet<TEntity> model)
+        protected UscControllerBase(TDbContext Db, string dbSetName)            
         {
             this.Db = Db;
-            this.DbSet = model;
+            var prop = this.Db.GetType().GetProperty(dbSetName);
+            if (prop == null)
+                throw new ArgumentException("Not Found!", nameof(dbSetName));
+            this.DbSet = prop.GetValue(Db) as DbSet<TEntity>;            
         }
 
-        protected ActionResult<IEnumerable<TEntity>> GetList()
+        protected virtual ActionResult<IEnumerable<TEntity>> InnerGetList()
         {
             return DbSet.AsNoTracking().ToArray();
         }
 
-        public ActionResult<TEntity> GetByKey(params object[] keyValues)
+        protected virtual TEntity InnerGetDataByKeys(HttpVerbs verb, params object[] keyValues)
         {
-            return null;
+            return DbSet.Find(keyValues);
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<IEnumerable<Course>> GetDepartmentCourses(int id)
+        protected virtual ActionResult<TEntity> InnerGetByKeys(params object[] keyValues)
         {
-            //var dept = Db.Departments.Include(p => p.cou)
-
-            return Db.Courses.Where(p => p.DepartmentId == id).ToArray();
+            var data = InnerGetDataByKeys(HttpVerbs.Get, keyValues);
+            if (data == null)
+                return NotFound();
+            return data;
+        }
+                        
+        protected virtual ActionResult<TEntity> InnerPost(object data, string getActionName, object routeValues)
+        {
+            TEntity toIns = (TEntity)typeof(TEntity).GetConstructor(Array.Empty<Type>()).Invoke(null);
+            toIns.UpdateFrom(data);
+            DbSet.Add(toIns);
+            Db.SaveChanges();
+            return CreatedAtAction(getActionName,routeValues, data);
         }
 
-        // [HttpPost("")]
-        // public ActionResult<Department> PostDepartment(Department model)
-        // {
-        //     return null;
-        // }
+        //[HttpPost("")]
+        //public ActionResult<TEntity> Post(TEntity data)
+        //{            
+        //    return InnerPost(data, nameof(GetByPK), new { keySet = data.GetKeyValueSet() });
+        //}
 
-        // [HttpPut("{id}")]
-        // public IActionResult PutDepartment(int id, Department model)
-        // {
-        //     return NoContent();
-        // }
+        protected virtual IActionResult InnerPutByKeys(object data, params object[] keyValues)
+        {
+            if (keyValues == null || keyValues.Length == 0)
+            {
+                if (data is not TEntity oldData)
+                {
+                    oldData = (TEntity)typeof(TEntity).GetConstructor(Array.Empty<Type>()).Invoke(null);
+                    oldData.UpdateFrom(data);
+                }
+                Db.Entry(oldData).State = EntityState.Modified;
+            }
+            else
+            {
+                var oldData = InnerGetDataByKeys(HttpVerbs.Put, keyValues);
+                if (oldData == null)
+                    return NotFound();
+                oldData.UpdateFrom(data);
+            }
+            Db.SaveChanges();
+            return NoContent();
+        }
 
-        // [HttpDelete("{id}")]
-        // public ActionResult<Department> DeleteDepartmentById(int id)
-        // {
-        //     return null;
-        // }
+        protected virtual IActionResult InnerPut(TEntity data)
+        {
+            return InnerPutByKeys(data, UscDbContextHelper.GetKeys<TEntity>(Db, data));
+        }
+        
+        protected virtual ActionResult<TEntity> InnerDeleteByKeys(params object[] keyValues)
+        {
+            //先 select 到 cache, 將 cache 標註為 deleted, SaveChanges() 時 update 到 DB            
+            var data = InnerGetDataByKeys(HttpVerbs.Delete, keyValues);
+            if (data == null) return NotFound();            
+            DbSet.Remove(data);
+
+            //直接在 cache 新增一筆並標註為 deleted, SaveChanges() 時 update 到 DB
+            //TEntity toDel = (TEntity)typeof(TEntity).GetConstructor(Array.Empty<Type>()).Invoke(null);
+            //toDel.SetKeys(keyValues);            
+            //Db.Entry(toDel).State = EntityState.Deleted; => 如果已經被 Find 到 cache 會有 key 值重覆的問題,
+            // => 分別建立 for Select/Insert/Update/Delete 4 個 model
+            // 看能不能都先 insert 到 #tmptable 再批次更新
+
+            // ef 不適合批次作業, 批量作業還是要 直接下 SQL
+            //db.Database.ExecuteSqlRaw($"Delete from db.Course where  CourseId = {id} ");
+
+            Db.SaveChanges();
+            return Ok();
+        }                
+    }
+
+
+    [Flags]
+    public enum HttpVerbs
+    {
+        Get = 1,
+        Delete = 8,
+        Post = 2,
+        Put = 4,
+        Head = 16,
+        Patch = 32,
+        Options = 64
     }
 }

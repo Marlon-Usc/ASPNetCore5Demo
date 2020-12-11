@@ -8,23 +8,18 @@ namespace ASPNETCore5Demo
     [AttributeUsage(AttributeTargets.Property, AllowMultiple=false, Inherited =true)]
     public class UscFieldAttribute : Attribute
     {
-        public enum Values
-        { 
-            None = 0,
-            NotNull = 1,
-            ReadOnly = 2,
+        public UscFieldAttribute()
+            : this(UscFieldAttrValues.None)
+        {  }
 
-            PrimaryKey = NotNull | 1024,
-        }
-
-        public UscFieldAttribute(Values value)
+        public UscFieldAttribute(UscFieldAttrValues value)
         {
             Value = value;
         }
 
-        public Values Value { get; set; }
+        public UscFieldAttrValues Value { get; set; }
 
-        bool _containsValue(Values value)
+        bool _containsValue(UscFieldAttrValues value)
         {
             return (Value & value) == value;
         }
@@ -33,7 +28,7 @@ namespace ASPNETCore5Demo
         {
             get
             {
-                return _containsValue(Values.NotNull);
+                return _containsValue(UscFieldAttrValues.NotNull);
             }
         }
 
@@ -41,16 +36,41 @@ namespace ASPNETCore5Demo
         {
             get
             {
-                return _containsValue(Values.ReadOnly);
+                return _containsValue(UscFieldAttrValues.ReadOnly);
             }
+        }
+    }
+
+    [Flags]
+    public enum UscFieldAttrValues
+    {
+        None = 0,
+        NotNull = 1,
+        ReadOnly = 2,
+        Visible = 4,
+    }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+    public class UscPrimaryKeyAttribute : Attribute
+    {
+        public UscPrimaryKeyAttribute(int order)
+        {
+            Order = order;
         }
 
-        public bool IsPrimaryKey
+        public readonly int Order;
+    }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+    public class UscForeignKeyAttribute : Attribute
+    {
+        public UscForeignKeyAttribute(string refObj, string[] refProps )
         {
-            get
-            {
-                return _containsValue(Values.PrimaryKey);
-            }
+            RefObjectName = refObj;
+            RefProperties = refProps;
         }
+
+        public readonly string RefObjectName;
+        public readonly string[] RefProperties;
     }
 }

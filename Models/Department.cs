@@ -5,13 +5,14 @@ using System.Collections.Generic;
 
 namespace ASPNETCore5Demo.Models
 {
-    public partial class Department
+    public partial class Department : UscEntityModelBase
     {
         public Department()
         {
             Courses = new HashSet<Course>();
         }
 
+        [UscField(UscFieldAttrValues.ReadOnly)]
         public int DepartmentId { get; set; }
         public string Name { get; set; }
         public decimal Budget { get; set; }
@@ -19,7 +20,21 @@ namespace ASPNETCore5Demo.Models
         public int? InstructorId { get; set; }
         public byte[] RowVersion { get; set; }
 
+        public DateTime DateModified { get; set; }
+        public bool IsDeleted { get; set; }
+
         public virtual Person Instructor { get; set; }
         public virtual ICollection<Course> Courses { get; set; }
     }
+    
+    public class DepartmentData
+    {
+        public int DepartmentId { get; set; }
+        public string Name { get; set; }
+        public decimal Budget { get; set; }
+        public DateTime StartDate { get; set; }
+        public int? InstructorId { get; set; }
+        //public byte[] RowVersion { get; set; }        
+    }
+
 }

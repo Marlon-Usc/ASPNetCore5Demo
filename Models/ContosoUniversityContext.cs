@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using System.Collections.Generic;
+using System.Linq;
 
 #nullable disable
 
@@ -51,6 +53,9 @@ namespace ASPNETCore5Demo.Models
                     .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.Title).HasMaxLength(50);
+
+                entity.Property(e => e.DateModified).HasColumnType("datetime");
+                entity.Property(e => e.IsDeleted).HasColumnType("boolean");
 
                 entity.HasOne(d => d.Department)
                     .WithMany(p => p.Courses)
@@ -104,6 +109,9 @@ namespace ASPNETCore5Demo.Models
                     .IsConcurrencyToken();
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.DateModified).HasColumnType("datetime");
+                entity.Property(e => e.IsDeleted).HasColumnType("boolean");
 
                 entity.HasOne(d => d.Instructor)
                     .WithMany(p => p.Departments)
@@ -180,6 +188,9 @@ namespace ASPNETCore5Demo.Models
                 entity.Property(e => e.LastName)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.Property(e => e.DateModified).HasColumnType("datetime");
+                entity.Property(e => e.IsDeleted).HasColumnType("boolean");
             });
 
             modelBuilder.Entity<VwCourseStudent>(entity =>
@@ -230,6 +241,6 @@ namespace ASPNETCore5Demo.Models
             OnModelCreatingPartial(modelBuilder);
         }
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);        
     }
 }

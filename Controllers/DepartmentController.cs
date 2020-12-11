@@ -8,52 +8,51 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPNETCore5Demo.Controllers
 {
-    [Route("api/[Department]")]
-    [ApiController]
-    public class DepartmentController : ControllerBase
-    {
-        public ContosoUniversityContext db { get; }
+    public class DepartmentController : MarkDeletedControllerBase<ContosoUniversityContext, Department>
+    {        
         public DepartmentController(ContosoUniversityContext db)
-        {
-            this.db = db;
-        }
+            : base(db, nameof(db.Departments))
+        { }
 
         [HttpGet("")]
-        public ActionResult<IEnumerable<Department>> GetDepartments()
-        {
-            return db.Departments.AsNoTracking().ToArray();
-        }
+        public ActionResult<IEnumerable<Department>> GetDepartments() => InnerGetList();
 
         [HttpGet("{id}")]
-        public ActionResult<Department> GetDepartmentById(int id)
-        {
-            return null;
-        }
+        public ActionResult<Department> GetDepartmentById(int id) => InnerGetByKeys(id);
 
-        [HttpGet("{id}")]
-        public ActionResult<IEnumerable<Course>> GetDepartmentCourses(int id)
-        {
-            //var dept = db.Departments.Include(p => p.cou)
+        [HttpPost("")]
+        public ActionResult<Department> PostDepartment(DepartmentData data) => InnerPost(data, nameof(GetDepartmentById), new { id = data.DepartmentId });
 
-            return db.Courses.Where(p => p.DepartmentId==id).ToArray();
-        }
+        [HttpPut("")]
+        public IActionResult PutDepartment(DepartmentData data) => InnerPutByKeys(data, data.DepartmentId);
 
-        // [HttpPost("")]
-        // public ActionResult<Department> PostDepartment(Department model)
-        // {
-        //     return null;
-        // }
+        [HttpDelete("{id}")]
+        public ActionResult<Department> DeleteDepartmentById(int id)
+            //=> InnerDeleteByKeys(id);
+            => InnerMarkDeletedByKeys(id);  
 
-        // [HttpPut("{id}")]
-        // public IActionResult PutDepartment(int id, Department model)
-        // {
-        //     return NoContent();
-        // }
+        //[HttpGet("ddl")]
+        //public ActionResult<IEnumerable<DepartmentDropDown>> GetDepartmentDropDown()
+        //{
+        //    // return db.Database.SqlQuery<DepartmentDropDown>($"SELECT DepartmentID, Name FROM dbo.Department").ToList();
 
-        // [HttpDelete("{id}")]
-        // public ActionResult<Department> DeleteDepartmentById(int id)
-        // {
-        //     return null;
-        // }
+        //    // return db.Departments.Select(p => new DepartmentDropDown() {
+        //    //     DepartmentId = p.DepartmentId,
+        //    //     Name = p.Name
+        //    // }).ToList();
+
+        //    return Db.DepartmentDropDown.FromSqlInterpolated($"SELECT DepartmentID, Name FROM dbo.Department").ToList();
+        //}
+
+        //[HttpGet("{id}")]
+        //public ActionResult<IEnumerable<Course>> GetDepartmentCourses(int id)
+        //{
+        //    var dept = Db.Departments.Include(p => p.Courses)
+        //                 .First(p => p.DepartmentId == id);
+
+        //    return dept.Courses.ToList();
+
+        //    // return Db.Courses.Where(p => p.DepartmentId == id).ToList();
+        //}
     }
 }

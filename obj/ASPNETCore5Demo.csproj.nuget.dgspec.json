@@ -1,20 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\dotnet5\\projects\\ASPNETCore5Demo\\ASPNETCore5Demo.csproj": {}
+    "D:\\MyCoreProjs\\ASPNetCore5Demo\\ASPNETCore5Demo.csproj": {}
   },
   "projects": {
-    "D:\\dotnet5\\projects\\ASPNETCore5Demo\\ASPNETCore5Demo.csproj": {
+    "D:\\MyCoreProjs\\ASPNetCore5Demo\\ASPNETCore5Demo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\dotnet5\\projects\\ASPNETCore5Demo\\ASPNETCore5Demo.csproj",
+        "projectUniqueName": "D:\\MyCoreProjs\\ASPNetCore5Demo\\ASPNETCore5Demo.csproj",
         "projectName": "ASPNETCore5Demo",
-        "projectPath": "D:\\dotnet5\\projects\\ASPNETCore5Demo\\ASPNETCore5Demo.csproj",
-        "packagesPath": "C:\\Users\\jonywu\\.nuget\\packages\\",
-        "outputPath": "D:\\dotnet5\\projects\\ASPNETCore5Demo\\obj\\",
+        "projectPath": "D:\\MyCoreProjs\\ASPNetCore5Demo\\ASPNETCore5Demo.csproj",
+        "packagesPath": "C:\\Users\\marlon_wu\\.nuget\\packages\\",
+        "outputPath": "D:\\MyCoreProjs\\ASPNetCore5Demo\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\jonywu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\marlon_wu\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +25,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "D:\\Wanpie_Net4.6\\src\\packages": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -53,6 +57,10 @@
               "noWarn": [
                 "NU1605"
               ]
+            },
+            "Microsoft.AspNetCore.Mvc.NewtonsoftJson": {
+              "target": "Package",
+              "version": "[5.0.1, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
@@ -101,7 +109,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     }

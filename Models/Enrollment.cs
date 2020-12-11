@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace ASPNETCore5Demo.Models
 {
-    public partial class Enrollment
+    public partial class Enrollment : UscEntityModelBase
     {
         public int EnrollmentId { get; set; }
         public int CourseId { get; set; }
@@ -14,5 +14,13 @@ namespace ASPNETCore5Demo.Models
 
         public virtual Course Course { get; set; }
         public virtual Person Student { get; set; }
+    }
+
+    public class EnrollmentData
+    {
+        public int EnrollmentId { get; set; }
+        public int CourseId { get; set; }
+        public int StudentId { get; set; }
+        public int? Grade { get; set; }
     }
 }
