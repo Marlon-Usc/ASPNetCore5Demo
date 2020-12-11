@@ -26,12 +26,15 @@ namespace ASPNETCore5Demo
 
         protected virtual ActionResult<IEnumerable<TEntity>> InnerGetList()
         {
+            if (typeof(IIsDeleted).IsAssignableFrom(typeof(TEntity) ))
+                return DbSet.Where(e => !true.Equals(((IIsDeleted)e).IsDeleted)).ToArray();
             return DbSet.AsNoTracking().ToArray();
         }
 
         protected virtual TEntity InnerGetDataByKeys(HttpVerbs verb, params object[] keyValues)
         {
-            return DbSet.Find(keyValues);
+            TEntity data = DbSet.Find(keyValues);
+            return (data == null || (data is IIsDeleted deleted && true.Equals(deleted.IsDeleted))) ? null : data;
         }
 
         protected virtual ActionResult<TEntity> InnerGetByKeys(params object[] keyValues)
@@ -86,6 +89,9 @@ namespace ASPNETCore5Demo
         
         protected virtual ActionResult<TEntity> InnerDeleteByKeys(params object[] keyValues)
         {
+            if (typeof(IIsDeleted).IsAssignableFrom(typeof(TEntity)))
+                return InnerMarkDeletedByKeys(keyValues);
+
             //先 select 到 cache, 將 cache 標註為 deleted, SaveChanges() 時 update 到 DB            
             var data = InnerGetDataByKeys(HttpVerbs.Delete, keyValues);
             if (data == null) return NotFound();            
@@ -103,7 +109,18 @@ namespace ASPNETCore5Demo
 
             Db.SaveChanges();
             return Ok();
-        }                
+        }
+
+        protected virtual ActionResult<TEntity> InnerMarkDeletedByKeys(params object[] keyValues)
+        {
+            IIsDeleted data = (IIsDeleted)InnerGetDataByKeys(HttpVerbs.Delete, keyValues);
+            if (data == null)
+                return NotFound();
+
+            data.IsDeleted = true;
+            Db.SaveChanges();
+            return Ok();
+        }
     }
 
 

@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace ASPNETCore5Demo.Models
 {
-    public partial class Course : UscEntityModelBase
+    public partial class Course : UscEntityModelBase, IUscModifyTrack, IIsDeleted
     {
         public Course()
         {
@@ -21,8 +21,8 @@ namespace ASPNETCore5Demo.Models
         public int Credits { get; set; }
         public int DepartmentId { get; set; }
 
-        public DateTime DateModified { get; set; }
-        public bool IsDeleted { get; set; }
+        public DateTime? DateModified { get; set; }
+        public bool? IsDeleted { get; set; }
 
         public virtual Department Department { get; set; }
         public virtual ICollection<CourseInstructor> CourseInstructors { get; set; }

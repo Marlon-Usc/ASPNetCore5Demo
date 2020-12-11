@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPNETCore5Demo.Controllers
 {
-    public class CourseController : MarkDeletedControllerBase<ContosoUniversityContext, Course>
+    public class CourseController : UscControllerBase<ContosoUniversityContext, Course>
     {
         public CourseController(ContosoUniversityContext db)
             : base(db, nameof(db.Courses))
@@ -30,5 +30,19 @@ namespace ASPNETCore5Demo.Controllers
         public ActionResult<Course> DeleteCourseById(int id) 
             //=> InnerDeleteByKeys(id);
             => InnerMarkDeletedByKeys(id);
+
+        [HttpGet("Students={CourseId}")]
+        public ActionResult<IEnumerable<VwCourseStudent>> GetStudentsByCourseId(int CourseId)
+        {
+            return Db.VwCourseStudents.AsNoTracking().Where(s => s.CourseId == CourseId).ToArray();
+        }
+
+        [HttpGet("StudentsCount={CourseId}")]
+        public ActionResult<IEnumerable<VwCourseStudentCount>> GetStudentsCountByCourseId(int CourseId)
+        {
+            return Db.VwCourseStudentCounts.AsNoTracking().Where(s => s.CourseId == CourseId).ToArray();
+            //return Db.VwCourseStudentCounts.FromSqlRaw<VwCourseStudentCount>
+            //   ($"SELECT DepartmentID, Name, CourseId, Title, StudentCount FROM dbo.vwCourseStudentCount where CourseId={CourseId}").ToArray();
+         }
     }
 }

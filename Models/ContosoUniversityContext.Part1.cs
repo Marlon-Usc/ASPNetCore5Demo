@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -6,30 +7,21 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ASPNETCore5Demo.Models
 {
-    public partial class ContosoUniversityContext : DbContext
+    //partial class ContosoUniversityContext : DbContext
+    //{
+    //    public virtual DbSet<DepartmentDropDown> DepartmentDropDown { get; set; }
+
+    //    partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
+    //    {
+    //        modelBuilder.Entity<DepartmentDropDown>(entity =>
+    //        {
+    //            entity.HasNoKey();
+    //        });
+    //    }
+    //}
+
+    partial class ContosoUniversityContext
     {
-        public virtual DbSet<DepartmentDropDown> DepartmentDropDown { get; set; }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<DepartmentDropDown>(entity =>
-            {
-                entity.HasNoKey();
-            });
-        }
-    }
-
-    public partial class ContosoUniversityContext : DbContext
-    {
-        public ContosoUniversityContext()
-        {
-        }
-
-        public ContosoUniversityContext(DbContextOptions<ContosoUniversityContext> options)
-            : base(options)
-        {
-        }
-
         public virtual DbSet<Course> Courses { get; set; }
         public virtual DbSet<CourseInstructor> CourseInstructors { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
@@ -40,6 +32,9 @@ namespace ASPNETCore5Demo.Models
         public virtual DbSet<VwCourseStudentCount> VwCourseStudentCounts { get; set; }
         public virtual DbSet<VwDepartmentCourseCount> VwDepartmentCourseCounts { get; set; }
 
+        public virtual DbSet<DepartmentDropDown> DepartmentDropDown { get; set; }
+        public virtual DbSet<DepartmentVersion> DepartmentVersion { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -49,7 +44,7 @@ namespace ASPNETCore5Demo.Models
             }
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Course>(entity =>
             {
@@ -66,7 +61,6 @@ namespace ASPNETCore5Demo.Models
                 entity.Property(e => e.Title).HasMaxLength(50);
 
                 entity.Property(e => e.DateModified).HasColumnType("datetime");
-                entity.Property(e => e.IsDeleted).HasColumnType("boolean");
 
                 entity.HasOne(d => d.Department)
                     .WithMany(p => p.Courses)
@@ -122,7 +116,6 @@ namespace ASPNETCore5Demo.Models
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.DateModified).HasColumnType("datetime");
-                entity.Property(e => e.IsDeleted).HasColumnType("boolean");
 
                 entity.HasOne(d => d.Instructor)
                     .WithMany(p => p.Departments)
@@ -201,7 +194,6 @@ namespace ASPNETCore5Demo.Models
                     .HasMaxLength(50);
 
                 entity.Property(e => e.DateModified).HasColumnType("datetime");
-                entity.Property(e => e.IsDeleted).HasColumnType("boolean");
             });
 
             modelBuilder.Entity<VwCourseStudent>(entity =>
@@ -249,9 +241,36 @@ namespace ASPNETCore5Demo.Models
                 entity.Property(e => e.Name).HasMaxLength(50);
             });
 
-            OnModelCreatingPartial(modelBuilder);
+            modelBuilder.Entity<DepartmentDropDown>(entity =>
+            {
+                entity.HasNoKey();
+            });
+
+            modelBuilder.Entity<DepartmentVersion>(entity =>
+            {
+                entity.HasNoKey();
+            });
         }
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+        public override int SaveChanges()
+        {
+            var modified = this.ChangeTracker.Entries()
+                            .Where(t => t.State == EntityState.Modified)
+                            .Select(t => t.Entity)
+                            .ToArray();
+
+            foreach (var entity in modified)
+            {
+                if (entity is IUscModifyTrack)
+                {
+                    IUscModifyTrack track = (IUscModifyTrack)entity;
+                    track.DateModified = DateTime.Now;
+                    //track.ModifiedBy = UserId;
+                }
+            }
+
+            return base.SaveChanges();
+        }
+
     }
 }

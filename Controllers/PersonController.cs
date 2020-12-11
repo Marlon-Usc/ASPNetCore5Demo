@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPNETCore5Demo.Controllers
 {
-    public class PersonController : MarkDeletedControllerBase<ContosoUniversityContext, Person>
+    public class PersonController : UscControllerBase<ContosoUniversityContext, Person>
     {
         public PersonController(ContosoUniversityContext db)
             : base(db, nameof(db.People))

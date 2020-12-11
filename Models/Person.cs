@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace ASPNETCore5Demo.Models
 {
-    public partial class Person : UscEntityModelBase
+    public partial class Person : UscEntityModelBase, IUscModifyTrack, IIsDeleted
     {
         public Person()
         {
@@ -23,8 +23,8 @@ namespace ASPNETCore5Demo.Models
         public DateTime? EnrollmentDate { get; set; }
         public string Discriminator { get; set; }
 
-        public DateTime DateModified { get; set; }
-        public bool IsDeleted { get; set; }
+        public DateTime? DateModified { get; set; }
+        public bool? IsDeleted { get; set; }
 
         [UscField(UscFieldAttrValues.ReadOnly)]
         [JsonIgnore]

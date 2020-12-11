@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPNETCore5Demo.Controllers
 {
-    public class DepartmentController : MarkDeletedControllerBase<ContosoUniversityContext, Department>
+    public class DepartmentController : UscControllerBase<ContosoUniversityContext, Department>
     {        
         public DepartmentController(ContosoUniversityContext db)
             : base(db, nameof(db.Departments))
@@ -29,7 +29,15 @@ namespace ASPNETCore5Demo.Controllers
         [HttpDelete("{id}")]
         public ActionResult<Department> DeleteDepartmentById(int id)
             //=> InnerDeleteByKeys(id);
-            => InnerMarkDeletedByKeys(id);  
+            => InnerMarkDeletedByKeys(id);
+
+
+        [HttpGet("CourseCount={id}")]
+        public ActionResult<VwDepartmentCourseCount> GetCourseCountById(int id)
+        {
+            return Db.VwDepartmentCourseCounts.FromSqlRaw<VwDepartmentCourseCount>
+                   ($"SELECT DepartmentID, Name, CourseCount FROM dbo.VwDepartmentCourseCount where DepartmentId={id}").First< VwDepartmentCourseCount>();
+        }
 
         //[HttpGet("ddl")]
         //public ActionResult<IEnumerable<DepartmentDropDown>> GetDepartmentDropDown()

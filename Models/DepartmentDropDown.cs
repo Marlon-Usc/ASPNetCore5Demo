@@ -5,4 +5,10 @@
         public int DepartmentId { get; set; }
         public string Name { get; set; }
     }
+
+    public class DepartmentVersion
+    {
+        public int DepartmentId { get; set; }
+        public byte[] RowVersion { get; set; }
+    }
 }
